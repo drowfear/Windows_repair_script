@@ -62,6 +62,7 @@ set "PH_NUM=1"
 set "PH_NAME=DISM RestoreHealth"
 set "PH_DESC=Repara la imagen de Windows. Es la fase mas larga: puede quedarse en 20%% o 62%% un buen rato, es normal."
 set "PH_WEIGHT=35"
+set "PH_HALF=900"
 set "PH_CMD=dism /Online /Cleanup-Image /RestoreHealth"
 call :RunPhase
 
@@ -72,6 +73,7 @@ set "PH_NUM=2"
 set "PH_NAME=SFC /scannow"
 set "PH_DESC=Comprueba y repara los archivos protegidos del sistema."
 set "PH_WEIGHT=25"
+set "PH_HALF=420"
 set "PH_CMD=sfc /scannow"
 call :RunPhase
 
@@ -82,6 +84,7 @@ set "PH_NUM=3"
 set "PH_NAME=Limpieza de WinSxS"
 set "PH_DESC=Elimina versiones antiguas de componentes de Windows para liberar espacio."
 set "PH_WEIGHT=15"
+set "PH_HALF=300"
 set "PH_CMD=dism /Online /Cleanup-Image /StartComponentCleanup"
 call :RunPhase
 
@@ -92,6 +95,7 @@ set "PH_NUM=4"
 set "PH_NAME=CHKDSK C: /scan"
 set "PH_DESC=Analiza el disco C: en busca de errores, sin necesidad de reiniciar."
 set "PH_WEIGHT=12"
+set "PH_HALF=180"
 set "PH_CMD=chkdsk C: /scan"
 call :RunPhase
 
@@ -102,6 +106,7 @@ set "PH_NUM=5"
 set "PH_NAME=Temporales y cache de Windows Update"
 set "PH_DESC=Detiene servicios de actualizacion, borra su cache y los archivos temporales."
 set "PH_WEIGHT=8"
+set "PH_HALF=60"
 set "PH_CMD=call "%~f0" /fase5"
 call :RunPhase
 
@@ -112,6 +117,7 @@ set "PH_NUM=6"
 set "PH_NAME=Red y DNS"
 set "PH_DESC=Vacia la cache DNS y restablece Winsock y TCP/IP."
 set "PH_WEIGHT=5"
+set "PH_HALF=30"
 set "PH_CMD=call "%~f0" /fase6"
 call :RunPhase
 
@@ -196,20 +202,29 @@ set "FMT_PH=%FMT%"
 call :FmtTime %EL_TOT%
 set "FMT_TOT=%FMT%"
 
+set "PH_EST="
 call :ReadPct
+if %PH_PCT% equ 0 call :Estimate
 set /a TOTAL=BASE+PH_WEIGHT*PH_PCT/100
 if %TOTAL% gtr 99 set "TOTAL=99"
 call :Bar
 
-if %PH_PCT% gtr 0 (set "PH_TXT=%PH_PCT%%%") else (set "PH_TXT=en curso...")
+set "PH_TXT=%PH_PCT%%%%PH_EST%"
 title Reparacion de Windows - %TOTAL%%%
 
 echo.
-echo  [%TIME:~0,8%] TOTAL [%BAR%] %TOTAL%%%
+echo  [%TIME:~0,8%] TOTAL [%BAR%] %TOTAL%%%%PH_EST%
 echo             Fase %PH_NUM%/%PH_TOTAL% - %PH_NAME%: %PH_TXT%
 echo             Tiempo de la fase: %FMT_PH%   Tiempo total: %FMT_TOT%
 goto :eof
 
+
+:: Estimate: si el comando no ha dado ningun porcentaje (salida sin volcar aun),
+:: se estima con una curva que sube rapido al principio y nunca pasa del 95%
+:Estimate
+set /a "PH_PCT=95*EL_PH/(EL_PH+PH_HALF)"
+set "PH_EST= (estimado)"
+goto :eof
 
 :: ReadPct: lee de la salida de la fase el ultimo porcentaje que ha impreso el comando
 :ReadPct
