@@ -1,7 +1,7 @@
 @echo off
 :: ==============================================================================
-:: Created by Drowfear - https://github.com/drowfear/Windows_repair_script
-:: Optimized with real-time feedback and progress indicators
+:: Created by DrSt1nger - https://github.com/DrSt1nger/Windows_repair_script
+:: Optimized to show native real-time progress bars from Windows tools
 :: ==============================================================================
 :: COMPREHENSIVE WINDOWS MAINTENANCE, REPAIR AND CLEANUP SCRIPT
 :: Requires Administrator Privileges
@@ -32,9 +32,9 @@ cls
 echo ==============================================================================
 echo                 STARTING SYSTEM MAINTENANCE AND REPAIR
 echo ==============================================================================
-echo [INFO] Initializing system diagnostic routines. Please do not close the window.
+echo [INFO] Initializing system diagnostic routines...
 echo.
-timeout /t 3 >nul
+timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 1: DISM (Deployment Image Servicing and Management)
@@ -43,23 +43,14 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 16%] [PHASE 1/6] Repairing Windows image (DISM)...
 echo ==============================================================================
-echo [STATUS] Running image restoration. This may take 5 to 15 minutes...
-echo [INFO] Please wait, processing data in background...
+echo [INFO] DISM will show its native progress bar below:
 echo.
 
-:: Ejecutamos DISM en segundo plano mostrando animación de puntos para que se vea activo
-start /b cmd /c "dism /Online /Cleanup-Image /RestoreHealth >> "%LOG%" 2>&1"
-:loop_dism
-tasklist /fi "imagename eq dism.exe" 2>nul | find /i "dism.exe" >nul
-if %errorlevel% equ 0 (
-    <nul set /p "=. "
-    timeout /t 3 >nul
-    goto loop_dism
-)
-
+:: Mostramos la salida en pantalla para que veas el porcentaje real de Windows
+dism /Online /Cleanup-Image /RestoreHealth
 echo.
 echo [OK] DISM completed successfully!
-timeout /t 2 >nul
+timeout /t 3 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 2: SFC (System File Checker)
@@ -68,21 +59,13 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 33%] [PHASE 2/6] Scanning and repairing protected system files (SFC)...
 echo ==============================================================================
-echo [STATUS] Analyzing system file integrity. Please wait...
+echo [INFO] SFC will show its native percentage below:
 echo.
 
-start /b cmd /c "sfc /scannow >> "%LOG%" 2>&1"
-:loop_sfc
-tasklist /fi "imagename eq sfc.exe" 2>nul | find /i "sfc.exe" >nul
-if %errorlevel% equ 0 (
-    <nul set /p "=. "
-    timeout /t 3 >nul
-    goto loop_sfc
-)
-
+sfc /scannow
 echo.
 echo [OK] SFC scan completed successfully!
-timeout /t 2 >nul
+timeout /t 3 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 3: WinSxS Component Store Cleanup
@@ -91,7 +74,7 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 50%] [PHASE 3/6] Cleaning and optimizing component store (WinSxS)...
 echo ==============================================================================
-echo [STATUS] Cleaning component store components. Please wait...
+echo [STATUS] Cleaning component store. Please wait...
 echo.
 
 dism /Online /Cleanup-Image /StartComponentCleanup >> "%LOG%" 2>&1
@@ -108,7 +91,7 @@ echo ===========================================================================
 echo [STATUS] Scanning drive C: for filesystem errors...
 echo.
 
-chkdsk C: /scan >> "%LOG%" 2>&1
+chkdsk C: /scan
 echo [OK] Disk scan completed!
 timeout /t 2 >nul
 
