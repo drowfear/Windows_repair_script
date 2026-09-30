@@ -1,6 +1,6 @@
 @echo off
 :: ==============================================================================
-:: Original by DrSt1nger - https://github.com/DrSt1nger/Windows_repair_script
+:: Original by Drowfear - https://github.com/drowfear/Windows_repair_script
 :: Version con informe de progreso: explica cada fase y muestra el porcentaje
 :: total cada 10 segundos, sin que el usuario tenga que intervenir.
 :: Requiere privilegios de Administrador
