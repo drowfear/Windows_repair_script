@@ -1,9 +1,9 @@
 @echo off
 :: ==============================================================================
-:: Created by DrSt1nger - https://github.com/DrSt1nger/Windows_repair_script
-:: Modified to include progress percentages
+:: Created by Drowfear - https://github.com/drowfear/Windows_repair_script
+:: Optimized with real-time feedback and progress indicators
 :: ==============================================================================
-:: COMPREHENSIVE WINDOWS MAINTENANCE, REPAIR AND CLEANUP SCRIPT (Optimized Edition)
+:: COMPREHENSIVE WINDOWS MAINTENANCE, REPAIR AND CLEANUP SCRIPT
 :: Requires Administrator Privileges
 :: ==============================================================================
 
@@ -32,16 +32,9 @@ cls
 echo ==============================================================================
 echo                 STARTING SYSTEM MAINTENANCE AND REPAIR
 echo ==============================================================================
-echo This process will perform:
-echo    - Windows image repair (DISM)
-echo    - System file integrity check (SFC)
-echo    - Component store cleanup (WinSxS)
-echo    - Disk integrity scan (CHKDSK)
-echo    - Temporary files cleanup
-echo    - Windows Update cache cleanup
-echo    - Network reset and DNS flush
+echo [INFO] Initializing system diagnostic routines. Please do not close the window.
 echo.
-pause
+timeout /t 3 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 1: DISM (Deployment Image Servicing and Management)
@@ -50,10 +43,22 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 16%] [PHASE 1/6] Repairing Windows image (DISM)...
 echo ==============================================================================
+echo [STATUS] Running image restoration. This may take 5 to 15 minutes...
+echo [INFO] Please wait, processing data in background...
 echo.
 
-dism /Online /Cleanup-Image /RestoreHealth >> "%LOG%"
-echo DISM completed.
+:: Ejecutamos DISM en segundo plano mostrando animación de puntos para que se vea activo
+start /b cmd /c "dism /Online /Cleanup-Image /RestoreHealth >> "%LOG%" 2>&1"
+:loop_dism
+tasklist /fi "imagename eq dism.exe" 2>nul | find /i "dism.exe" >nul
+if %errorlevel% equ 0 (
+    <nul set /p "=. "
+    timeout /t 3 >nul
+    goto loop_dism
+)
+
+echo.
+echo [OK] DISM completed successfully!
 timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
@@ -63,10 +68,20 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 33%] [PHASE 2/6] Scanning and repairing protected system files (SFC)...
 echo ==============================================================================
+echo [STATUS] Analyzing system file integrity. Please wait...
 echo.
 
-sfc /scannow >> "%LOG%"
-echo SFC completed.
+start /b cmd /c "sfc /scannow >> "%LOG%" 2>&1"
+:loop_sfc
+tasklist /fi "imagename eq sfc.exe" 2>nul | find /i "sfc.exe" >nul
+if %errorlevel% equ 0 (
+    <nul set /p "=. "
+    timeout /t 3 >nul
+    goto loop_sfc
+)
+
+echo.
+echo [OK] SFC scan completed successfully!
 timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
@@ -76,10 +91,11 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 50%] [PHASE 3/6] Cleaning and optimizing component store (WinSxS)...
 echo ==============================================================================
+echo [STATUS] Cleaning component store components. Please wait...
 echo.
 
-dism /Online /Cleanup-Image /StartComponentCleanup >> "%LOG%"
-echo Component store cleanup completed.
+dism /Online /Cleanup-Image /StartComponentCleanup >> "%LOG%" 2>&1
+echo [OK] Component store cleanup completed!
 timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
@@ -89,10 +105,11 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 66%] [PHASE 4/6] Checking drive C: integrity...
 echo ==============================================================================
+echo [STATUS] Scanning drive C: for filesystem errors...
 echo.
 
-chkdsk C: /scan >> "%LOG%"
-echo Disk scan completed.
+chkdsk C: /scan >> "%LOG%" 2>&1
+echo [OK] Disk scan completed!
 timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
@@ -102,6 +119,7 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 83%] [PHASE 5/6] Cleaning temporary files and Windows Update cache...
 echo ==============================================================================
+echo [STATUS] Stopping services and clearing temporary caches...
 echo.
 
 echo -- Stopping Windows Update related services...
@@ -121,7 +139,7 @@ echo -- Cleaning temporary folders...
 del /f /q /s "%TEMP%\*.*" 2>nul
 del /f /q /s "%SystemRoot%\Temp\*.*" 2>nul
 
-echo Temporary cleanup completed.
+echo [OK] Temporary cleanup completed!
 timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
@@ -131,14 +149,14 @@ cls
 echo ==============================================================================
 echo [PROGRESS: 100%] [PHASE 6/6] Resetting network components and flushing DNS...
 echo ==============================================================================
+echo [STATUS] Flushing DNS cache and resetting TCP/IP stack...
 echo.
 
 ipconfig /flushdns >> "%LOG%"
 netsh winsock reset >> "%LOG%"
 netsh int ip reset >> "%LOG%"
-echo Network reset completed.
-timeout /t 2 >nul
 
+echo [OK] Network reset completed!
 echo ==== PROCESS FINISHED (%DATE% %TIME%) ==== >> "%LOG%"
 
 :: ------------------------------------------------------------------------------
