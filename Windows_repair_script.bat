@@ -1,6 +1,7 @@
 @echo off
 :: ==============================================================================
 :: Created by DrSt1nger - https://github.com/DrSt1nger/Windows_repair_script
+:: Modified to include progress percentages
 :: ==============================================================================
 :: COMPREHENSIVE WINDOWS MAINTENANCE, REPAIR AND CLEANUP SCRIPT (Optimized Edition)
 :: Requires Administrator Privileges
@@ -29,73 +30,77 @@ if %errorlevel% neq 0 (
 
 cls
 echo ==============================================================================
-echo                STARTING SYSTEM MAINTENANCE AND REPAIR
+echo                 STARTING SYSTEM MAINTENANCE AND REPAIR
 echo ==============================================================================
 echo This process will perform:
-echo   - Windows image repair (DISM)
-echo   - System file integrity check (SFC)
-echo   - Component store cleanup (WinSxS)
-echo   - Disk integrity scan (CHKDSK)
-echo   - Temporary files cleanup
-echo   - Windows Update cache cleanup
-echo   - Network reset and DNS flush
+echo    - Windows image repair (DISM)
+echo    - System file integrity check (SFC)
+echo    - Component store cleanup (WinSxS)
+echo    - Disk integrity scan (CHKDSK)
+echo    - Temporary files cleanup
+echo    - Windows Update cache cleanup
+echo    - Network reset and DNS flush
 echo.
 pause
 
 :: ------------------------------------------------------------------------------
 :: PHASE 1: DISM (Deployment Image Servicing and Management)
 :: ------------------------------------------------------------------------------
-echo.
+cls
 echo ==============================================================================
-echo [PHASE 1/6] Repairing Windows image (DISM)...
+echo [PROGRESS: 16%] [PHASE 1/6] Repairing Windows image (DISM)...
 echo ==============================================================================
 echo.
 
 dism /Online /Cleanup-Image /RestoreHealth >> "%LOG%"
 echo DISM completed.
+timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 2: SFC (System File Checker)
 :: ------------------------------------------------------------------------------
-echo.
+cls
 echo ==============================================================================
-echo [PHASE 2/6] Scanning and repairing protected system files (SFC)...
+echo [PROGRESS: 33%] [PHASE 2/6] Scanning and repairing protected system files (SFC)...
 echo ==============================================================================
 echo.
 
 sfc /scannow >> "%LOG%"
 echo SFC completed.
+timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 3: WinSxS Component Store Cleanup
 :: ------------------------------------------------------------------------------
-echo.
+cls
 echo ==============================================================================
-echo [PHASE 3/6] Cleaning and optimizing component store (WinSxS)...
+echo [PROGRESS: 50%] [PHASE 3/6] Cleaning and optimizing component store (WinSxS)...
 echo ==============================================================================
 echo.
 
 dism /Online /Cleanup-Image /StartComponentCleanup >> "%LOG%"
 echo Component store cleanup completed.
+timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 4: Disk Integrity Check
 :: ------------------------------------------------------------------------------
-echo.
+cls
 echo ==============================================================================
-echo [PHASE 4/6] Checking drive C: integrity...
+echo [PROGRESS: 66%] [PHASE 4/6] Checking drive C: integrity...
 echo ==============================================================================
 echo.
 
 chkdsk C: /scan >> "%LOG%"
 echo Disk scan completed.
+timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 5: Temp Files & Windows Update Cache Cleanup
 :: ------------------------------------------------------------------------------
-echo.
+cls
 echo ==============================================================================
-echo [PHASE 5/6] Cleaning temporary files and Windows Update cache...
+echo [PROGRESS: 83%] [PHASE 5/6] Cleaning temporary files and Windows Update cache...
 echo ==============================================================================
 echo.
 
@@ -117,13 +122,14 @@ del /f /q /s "%TEMP%\*.*" 2>nul
 del /f /q /s "%SystemRoot%\Temp\*.*" 2>nul
 
 echo Temporary cleanup completed.
+timeout /t 2 >nul
 
 :: ------------------------------------------------------------------------------
 :: PHASE 6: Network & DNS Reset
 :: ------------------------------------------------------------------------------
-echo.
+cls
 echo ==============================================================================
-echo [PHASE 6/6] Resetting network components and flushing DNS...
+echo [PROGRESS: 100%] [PHASE 6/6] Resetting network components and flushing DNS...
 echo ==============================================================================
 echo.
 
@@ -131,17 +137,21 @@ ipconfig /flushdns >> "%LOG%"
 netsh winsock reset >> "%LOG%"
 netsh int ip reset >> "%LOG%"
 echo Network reset completed.
+timeout /t 2 >nul
 
 echo ==== PROCESS FINISHED (%DATE% %TIME%) ==== >> "%LOG%"
 
-echo.
+:: ------------------------------------------------------------------------------
+:: FINISHED
+:: ------------------------------------------------------------------------------
+cls
 echo ==============================================================================
-echo                       MAINTENANCE COMPLETED!
+echo                         MAINTENANCE COMPLETED! (100%)
 echo ==============================================================================
 echo All repair and cleanup tasks have been executed successfully.
 echo A system reboot is recommended to apply all changes.
 echo.
 echo Log file saved at:
-echo   %LOG%
+echo    %LOG%
 echo.
 pause
